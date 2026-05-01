@@ -46,9 +46,11 @@ export async function sendDailyNotifications(): Promise<void> {
         token: profile.fcm_token,
         notification: { title, body },
         android: {
-          channelId: 'revise_reminders',
           priority: 'high',
-          notification: { sound: 'default' },
+          notification: {
+            channelId: 'revise_reminders',
+            sound: 'default',
+          },
         },
         data: { screen: 'home/today' },
       });
