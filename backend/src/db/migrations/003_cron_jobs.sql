@@ -4,9 +4,9 @@
 -- Requires pg_cron extension (enabled in 001).
 -- ============================================================
 
--- Set app configuration variables (replace with your real values)
-ALTER DATABASE postgres SET app.backend_url = 'https://your-backend.railway.app';
-ALTER DATABASE postgres SET app.internal_secret = 'your-strong-internal-secret-here';
+-- Replace these placeholders below before running this migration:
+--   https://your-backend.railway.app
+--   your-strong-internal-secret-here
 
 -- ── JOB 1: Increment missed_count for overdue topics (midnight UTC daily) ──
 -- This replaces the job defined in 001 (if you used SELECT cron.schedule there,
@@ -45,8 +45,8 @@ SELECT cron.schedule(
   '5 * * * *',   -- 5 minutes past every hour
   $$
     SELECT net.http_post(
-      url     := current_setting('app.backend_url') || '/internal/send-notifications',
-      headers := jsonb_build_object('x-internal-secret', current_setting('app.internal_secret')),
+      url     := 'https://your-backend.railway.app/internal/send-notifications',
+      headers := jsonb_build_object('x-internal-secret', 'your-strong-internal-secret-here'),
       body    := '{}'::jsonb
     );
   $$

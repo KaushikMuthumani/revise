@@ -4,13 +4,14 @@ node_modules/
 # Environment files
 .env
 .env.*
-.env.example
+!.env.example
 app/.env
 app/.env.*
-app/.env.example
+!app/.env.example
+app/google-services.json
 backend/.env
 backend/.env.*
-backend/.env.example
+!backend/.env.example
 
 # Backend build output
 backend/dist/
