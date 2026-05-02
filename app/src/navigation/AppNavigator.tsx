@@ -23,7 +23,7 @@ function LoadingScreen() {
 }
 
 export function AppNavigator() {
-  const { user, isLoading, initSession } = useAuthStore();
+  const { session, isLoading, initSession } = useAuthStore();
 
   useEffect(() => {
     initSession();
@@ -37,7 +37,7 @@ export function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {!user ? (
+        {!session ? (
           // Auth stack
           <>
             <Stack.Screen name="Login" component={LoginScreen} />

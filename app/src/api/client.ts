@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import * as SecureStore from 'expo-secure-store';
+import axios, { AxiosInstance } from 'axios';
+import { supabase } from '../store/useAuthStore';
 
 const API_URL = process.env.EXPO_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1';
 
@@ -13,21 +13,22 @@ export function getApiClient(): AxiosInstance {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    // Request interceptor: attach JWT
+    // Attach JWT from Supabase session on every request
     apiClient.interceptors.request.use(async (config) => {
-      const token = await SecureStore.getItemAsync('access_token');
-      if (token) config.headers.Authorization = `Bearer ${token}`;
+      const { data } = await supabase.auth.getSession();
+      const token = data.session?.access_token;
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
       return config;
     });
 
-    // Response interceptor: handle 401
+    // Handle 401 - session expired
     apiClient.interceptors.response.use(
       (response) => response,
-      async (error: AxiosError) => {
+      async (error) => {
         if (error.response?.status === 401) {
-          // Clear stored token — auth store will pick this up
-          await SecureStore.deleteItemAsync('access_token');
-          await SecureStore.deleteItemAsync('refresh_token');
+          await supabase.auth.signOut();
         }
         return Promise.reject(error);
       }

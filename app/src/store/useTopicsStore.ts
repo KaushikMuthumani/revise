@@ -12,7 +12,7 @@ interface TopicsState {
   fetchDashboard: () => Promise<void>;
   markRevised: (id: string) => Promise<void>;
   deleteTopic: (id: string) => Promise<void>;
-  addTopic: (data: { title: string; subject_tag: string; note?: string; image_base64?: string; image_mime_type?: string }) => Promise<{ error?: string; code?: string }>;
+  addTopic: (data: { title: string; subject_tag: string; note?: string; image_base64?: string; image_mime_type?: string }) => Promise<{ error?: string; code?: string; warning?: string }>;
 }
 
 export const useTopicsStore = create<TopicsState>((set, get) => ({
@@ -95,8 +95,23 @@ export const useTopicsStore = create<TopicsState>((set, get) => ({
       await get().fetchDashboard();
       return {};
     } catch (e: any) {
+      if (data.image_base64 && e.response?.status >= 500) {
+        try {
+          const { image_base64, image_mime_type, ...topicWithoutImage } = data;
+          await apiCreateTopic(topicWithoutImage);
+          await get().fetchDashboard();
+          return { warning: 'Topic saved. The image could not be uploaded right now.' };
+        } catch (retryError: any) {
+          const code = retryError.response?.data?.error;
+          return {
+            error: retryError.response?.data?.error ?? retryError.message ?? 'Could not save topic.',
+            code,
+          };
+        }
+      }
+
       const code = e.response?.data?.error;
-      return { error: e.response?.data?.error ?? e.message, code };
+      return { error: e.response?.data?.error ?? e.message ?? 'Could not save topic.', code };
     }
   },
 }));

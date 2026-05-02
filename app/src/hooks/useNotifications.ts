@@ -13,10 +13,10 @@ Notifications.setNotificationHandler({
 });
 
 export function useNotifications() {
-  const { user } = useAuthStore();
+  const { session } = useAuthStore();
 
   useEffect(() => {
-    if (!user) return;
+    if (!session) return;
 
     async function setup() {
       // Request permission
@@ -34,20 +34,20 @@ export function useNotifications() {
       // Get FCM token
       const fcmToken = await messaging().getToken();
       if (fcmToken) {
-        await updateProfile({ fcm_token: fcmToken });
+        await updateProfile({ fcm_token: fcmToken }).catch(() => undefined);
       }
 
       // Handle token refresh
       const unsubscribe = messaging().onTokenRefresh(async (newToken) => {
-        await updateProfile({ fcm_token: newToken });
+        await updateProfile({ fcm_token: newToken }).catch(() => undefined);
       });
 
       return unsubscribe;
     }
 
-    const cleanup = setup();
+    const cleanup = setup().catch(() => undefined);
     return () => {
       cleanup.then((fn) => fn?.());
     };
-  }, [user]);
+  }, [session]);
 }

@@ -68,6 +68,10 @@ export function AddTopicScreen({ navigation }: Props) {
       Alert.alert('Error', result.error);
       return;
     }
+    if (result.warning) {
+      Alert.alert('Saved', result.warning, [{ text: 'OK', onPress: () => navigation.goBack() }]);
+      return;
+    }
     navigation.goBack();
   }
 
@@ -87,7 +91,7 @@ export function AddTopicScreen({ navigation }: Props) {
           {/* Title */}
           <Text style={styles.label}>Topic Title *</Text>
           <TextInput
-            style={[styles.input, titleError && styles.inputError]}
+            style={[styles.input, titleError ? styles.inputError : null]}
             placeholder="e.g. Chapter 5 — Cell Biology"
             placeholderTextColor={Colors.gray400}
             value={title}
@@ -98,7 +102,7 @@ export function AddTopicScreen({ navigation }: Props) {
           {/* Subject Tag */}
           <Text style={styles.label}>Subject / Tag *</Text>
           <TextInput
-            style={[styles.input, tagError && styles.inputError]}
+            style={[styles.input, tagError ? styles.inputError : null]}
             placeholder="e.g. Biology, Polity, Math"
             placeholderTextColor={Colors.gray400}
             value={subjectTag}

@@ -15,7 +15,7 @@ export function SignUpScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [referralCode, setReferralCode] = useState('');
-  const { signUp, isLoading, error, clearError } = useAuthStore();
+  const { signUp, resendConfirmation, isLoading, error, notice, clearError } = useAuthStore();
 
   async function handleSignUp() {
     if (!displayName.trim() || !email.trim() || !password.trim()) return;
@@ -83,6 +83,19 @@ export function SignUpScreen({ navigation }: Props) {
           />
 
           {error && <Text style={styles.errorText}>{error}</Text>}
+          {notice && (
+            <View style={styles.noticeBox}>
+              <Text style={styles.noticeTitle}>Confirm your email</Text>
+              <Text style={styles.noticeText}>{notice}</Text>
+              <TouchableOpacity
+                style={styles.secondaryBtn}
+                onPress={() => resendConfirmation(email)}
+                disabled={isLoading}
+              >
+                <Text style={styles.secondaryBtnText}>Resend email</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
           <TouchableOpacity
             style={[styles.btn, (!displayName || !email || !password) && styles.btnDisabled]}
@@ -126,6 +139,22 @@ const styles = StyleSheet.create({
     color: Colors.gray900, marginBottom: 16, backgroundColor: Colors.gray50,
   },
   errorText: { color: Colors.error, fontSize: 13, marginBottom: 12, textAlign: 'center' },
+  noticeBox: {
+    backgroundColor: Colors.successBg,
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 14,
+  },
+  noticeTitle: { color: Colors.gray900, fontSize: 15, fontWeight: '700', marginBottom: 4 },
+  noticeText: { color: Colors.gray700, fontSize: 13, lineHeight: 18, marginBottom: 10 },
+  secondaryBtn: {
+    borderWidth: 1,
+    borderColor: Colors.success,
+    borderRadius: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  secondaryBtnText: { color: Colors.success, fontSize: 13, fontWeight: '700' },
   btn: {
     backgroundColor: Colors.primary, borderRadius: 12,
     paddingVertical: 15, alignItems: 'center', marginBottom: 16,

@@ -13,7 +13,15 @@ type Props = { navigation: NativeStackNavigationProp<any> };
 export function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { signIn, isLoading, error, clearError } = useAuthStore();
+  const {
+    signIn,
+    resendConfirmation,
+    sendPasswordReset,
+    isLoading,
+    error,
+    notice,
+    clearError,
+  } = useAuthStore();
 
   async function handleLogin() {
     if (!email.trim() || !password.trim()) return;
@@ -54,11 +62,21 @@ export function LoginScreen({ navigation }: Props) {
             secureTextEntry
           />
 
-          <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
+          <TouchableOpacity onPress={() => sendPasswordReset(email)} disabled={isLoading}>
             <Text style={styles.forgotText}>Forgot password?</Text>
           </TouchableOpacity>
 
           {error && <Text style={styles.errorText}>{error}</Text>}
+          {notice && <Text style={styles.noticeText}>{notice}</Text>}
+          {error?.toLowerCase().includes('email not confirmed') && (
+            <TouchableOpacity
+              style={styles.secondaryBtn}
+              onPress={() => resendConfirmation(email)}
+              disabled={isLoading}
+            >
+              <Text style={styles.secondaryBtnText}>Resend confirmation email</Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             style={[styles.btn, (!email || !password) && styles.btnDisabled]}
@@ -101,6 +119,24 @@ const styles = StyleSheet.create({
   },
   forgotText: { fontSize: 13, color: Colors.primary, textAlign: 'right', marginBottom: 24 },
   errorText: { color: Colors.error, fontSize: 13, marginBottom: 12, textAlign: 'center' },
+  noticeText: {
+    color: Colors.success,
+    backgroundColor: Colors.successBg,
+    borderRadius: 10,
+    padding: 12,
+    fontSize: 13,
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  secondaryBtn: {
+    borderWidth: 1,
+    borderColor: Colors.primary,
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  secondaryBtnText: { color: Colors.primary, fontSize: 14, fontWeight: '700' },
   btn: {
     backgroundColor: Colors.primary, borderRadius: 12,
     paddingVertical: 15, alignItems: 'center', marginBottom: 16,

@@ -2,6 +2,7 @@
   "expo": {
     "name": "Revise",
     "slug": "revise-app",
+    "scheme": "revise",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,7 +17,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#1A56DB"
       },
-      "package": "com.kaushik.revise",
+      "package": "com.yourapp.revise",
       "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.INTERNET",
@@ -28,15 +29,9 @@
       "versionCode": 1
     },
     "plugins": [
+      "./plugins/withReactNativeIapStore",
       "@react-native-firebase/app",
-      [
-        "@react-native-firebase/messaging",
-        {
-          "android": {
-            "notificationColor": "#1A56DB"
-          }
-        }
-      ],
+      "@react-native-firebase/messaging",
       [
         "expo-notifications",
         {

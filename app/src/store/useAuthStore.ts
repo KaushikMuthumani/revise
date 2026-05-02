@@ -1,20 +1,13 @@
 import { create } from 'zustand';
-import { createClient, SupabaseClient, Session, User } from '@supabase/supabase-js';
-import * as SecureStore from 'expo-secure-store';
+import { createClient, Session, User } from '@supabase/supabase-js';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const SUPABASE_URL = process.env.EXPO_PUBLIC_SUPABASE_URL!;
 const SUPABASE_ANON_KEY = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!;
 
-// Supabase client with SecureStore adapter
-const supabaseStorage = {
-  getItem: (key: string) => SecureStore.getItemAsync(key),
-  setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
-  removeItem: (key: string) => SecureStore.deleteItemAsync(key),
-};
-
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
   auth: {
-    storage: supabaseStorage,
+    storage: AsyncStorage,
     autoRefreshToken: true,
     persistSession: true,
     detectSessionInUrl: false,
@@ -41,20 +34,24 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   initSession: async () => {
     set({ isLoading: true });
-    const { data } = await supabase.auth.getSession();
-    set({
-      session: data.session,
-      user: data.session?.user ?? null,
-      isLoading: false,
-    });
+    try {
+      const { data } = await supabase.auth.getSession();
+      set({
+        session: data.session,
+        user: data.session?.user ?? null,
+        isLoading: false,
+      });
 
-    // Listen for auth changes
-    supabase.auth.onAuthStateChange((_event, session) => {
-      set({ session, user: session?.user ?? null });
-      if (session?.access_token) {
-        SecureStore.setItemAsync('access_token', session.access_token);
-      }
-    });
+      // Listen for auth state changes
+      supabase.auth.onAuthStateChange((_event, session) => {
+        set({
+          session,
+          user: session?.user ?? null,
+        });
+      });
+    } catch (e) {
+      set({ isLoading: false });
+    }
   },
 
   signUp: async (email, password, displayName, referralCode) => {
@@ -73,29 +70,24 @@ export const useAuthStore = create<AuthState>((set) => ({
       set({ error: error.message, isLoading: false });
       return;
     }
-    if (data.session?.access_token) {
-      await SecureStore.setItemAsync('access_token', data.session.access_token);
-    }
     set({ user: data.user, session: data.session, isLoading: false });
   },
 
   signIn: async (email, password) => {
     set({ isLoading: true, error: null });
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) {
       set({ error: error.message, isLoading: false });
       return;
-    }
-    if (data.session?.access_token) {
-      await SecureStore.setItemAsync('access_token', data.session.access_token);
     }
     set({ user: data.user, session: data.session, isLoading: false });
   },
 
   signOut: async () => {
     await supabase.auth.signOut();
-    await SecureStore.deleteItemAsync('access_token');
-    await SecureStore.deleteItemAsync('refresh_token');
     set({ user: null, session: null });
   },
 

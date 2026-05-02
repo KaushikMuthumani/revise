@@ -8,7 +8,6 @@ node_modules/
 app/.env
 app/.env.*
 !app/.env.example
-app/google-services.json
 backend/.env
 backend/.env.*
 !backend/.env.example
