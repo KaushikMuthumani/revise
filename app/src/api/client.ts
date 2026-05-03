@@ -13,22 +13,45 @@ export function getApiClient(): AxiosInstance {
       headers: { 'Content-Type': 'application/json' },
     });
 
-    // Attach JWT from Supabase session on every request
     apiClient.interceptors.request.use(async (config) => {
-      const { data } = await supabase.auth.getSession();
-      const token = data.session?.access_token;
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      try {
+        // First try to get current session
+        const { data } = await supabase.auth.getSession();
+        let token = data.session?.access_token;
+
+        // If no session, try to refresh
+        if (!token) {
+          const { data: refreshData } = await supabase.auth.refreshSession();
+          token = refreshData.session?.access_token;
+        }
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        } else {
+          console.warn('API call made with no auth token');
+        }
+      } catch (e) {
+        console.warn('Failed to get auth token:', e);
       }
       return config;
     });
 
-    // Handle 401 - session expired
     apiClient.interceptors.response.use(
       (response) => response,
       async (error) => {
         if (error.response?.status === 401) {
-          await supabase.auth.signOut();
+          console.log('Got 401 - attempting token refresh');
+          try {
+            const { data } = await supabase.auth.refreshSession();
+            if (data.session) {
+              // Retry the request with new token
+              error.config.headers.Authorization = `Bearer ${data.session.access_token}`;
+              return axios(error.config);
+            }
+          } catch (e) {
+            console.log('Token refresh failed, signing out');
+            await supabase.auth.signOut();
+          }
         }
         return Promise.reject(error);
       }

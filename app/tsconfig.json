@@ -8,12 +8,11 @@
       "esnext"
     ],
     "module": "esnext",
-    "moduleResolution": "node10",
+    "moduleResolution": "bundler",
     "noEmit": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
     "target": "esnext",
-    "ignoreDeprecations": "5.0",
     "strict": true
   },
   "extends": "expo/tsconfig.base"

@@ -20,7 +20,7 @@ revise/
 |------|---------|
 | Node.js | 20+ |
 | npm | 9+ |
-| Expo CLI | `npm i -g expo-cli` |
+| Expo CLI | bundled in the app's `expo` package; use `npx expo ...` from `app/` |
 | EAS CLI | `npm i -g eas-cli` |
 | Supabase account | free tier sufficient |
 | Firebase project | for FCM push notifications |
@@ -119,9 +119,15 @@ cp ~/Downloads/google-services.json app/android/app/google-services.json
 
 ```bash
 cd app
-npx expo start --android
+npx expo start --dev-client --host lan -c
 # or
 npx expo run:android
+```
+
+From the repository root, you can run the same dev-client server with:
+
+```bash
+npm run app:start
 ```
 
 ### 2.5 Build release APK/AAB with EAS
@@ -136,6 +142,12 @@ eas build --platform android --profile development
 
 # Production AAB (for Play Store)
 eas build --platform android --profile production
+```
+
+From the repository root, use:
+
+```bash
+npm run app:eas:development
 ```
 
 ---

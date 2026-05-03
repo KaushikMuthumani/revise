@@ -19,6 +19,7 @@ build/
 coverage/
 
 # Expo / React Native
+.expo/
 app/.expo/
 app/.expo-shared/
 app/web-build/

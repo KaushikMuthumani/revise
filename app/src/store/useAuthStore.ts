@@ -23,36 +23,13 @@ interface AuthState {
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
   clearError: () => void;
-  initSession: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>((set) => ({
   user: null,
   session: null,
-  isLoading: true,
+  isLoading: false,
   error: null,
-
-  initSession: async () => {
-    set({ isLoading: true });
-    try {
-      const { data } = await supabase.auth.getSession();
-      set({
-        session: data.session,
-        user: data.session?.user ?? null,
-        isLoading: false,
-      });
-
-      // Listen for auth state changes
-      supabase.auth.onAuthStateChange((_event, session) => {
-        set({
-          session,
-          user: session?.user ?? null,
-        });
-      });
-    } catch (e) {
-      set({ isLoading: false });
-    }
-  },
 
   signUp: async (email, password, displayName, referralCode) => {
     set({ isLoading: true, error: null });
